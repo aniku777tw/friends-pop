@@ -10,7 +10,7 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     // 模擬登入成功後，導到首頁
-    router.replace('/setup/profile')
+    router.replace('/(setup)/profile')
   }
   return (
     <Box

@@ -25,7 +25,7 @@ const ProfileSetupScreen = () => {
   const [images, setImages] = useState<string[]>([])
 
   const handleComplete = () => {
-    router.replace('/match')
+    router.replace('/(tabs)/match')
   }
 
   const pickImage = async () => {

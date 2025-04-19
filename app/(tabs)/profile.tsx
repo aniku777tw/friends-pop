@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity, StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import {
   Box,
   Text,
@@ -17,7 +17,7 @@ const ProfileScreen = () => {
 
   const handleEditPress = () => {
     // 點擊編輯按鈕時，導航到 ProfileSetupScreen
-    router.push('/setup/profile')
+    router.push('/(setup)/profile')
   }
 
   // 假資料

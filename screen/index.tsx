@@ -7,19 +7,13 @@ const ScreenStack = () => {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(chat)" options={{ headerShown: false }} />
+      <Stack.Screen name="(setup)" options={{ headerShown: false }} />
       <Stack.Screen
-        name="(modals)/setting"
+        name="(modals)"
         options={{
+          headerShown: false,
           presentation: 'modal',
-          title: t('setting.title'),
-        }}
-      />
-      <Stack.Screen
-        name="setup/profile/index"
-        options={{
-          presentation:'containedTransparentModal' ,
-          title: t('profile.title'),
-          
         }}
       />
     </Stack>

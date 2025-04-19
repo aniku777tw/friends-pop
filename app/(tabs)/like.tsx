@@ -36,8 +36,8 @@ const CardGrid = ({ data }: { data: LikedItem[] }) => (
   <FlatList
     data={data}
     numColumns={2}
-    keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
+    keyExtractor={(item: any) => item.id}
+    renderItem={({ item }: any) => (
       <Pressable
         flex={1}
         margin={4}
