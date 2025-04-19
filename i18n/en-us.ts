@@ -1,20 +1,19 @@
 export const en_us = {
   translation: {
-    setting: {
-      tab: 'Settings',
-      header: 'Settings',
+    like: {
+      title: 'Like',
     },
     chat: {
-      tab: 'Chat',
-      header: 'Chat',
+      title: 'Chat',
     },
     profile: {
-      tab: 'Profile',
-      header: 'Profile',
+      title: 'Profile',
     },
     match: {
-      tab: 'Match',
-      header: 'Match',
+      title: 'Match',
+    },
+    setting: {
+      title: 'Settings',
     },
   },
 }

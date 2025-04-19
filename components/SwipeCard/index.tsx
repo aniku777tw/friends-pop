@@ -1,117 +1,147 @@
 // TinderCard.tsx
-import React from 'react';
-import { Dimensions, StyleSheet, Image, ScrollView, View } from 'react-native';
+import React, { forwardRef, useImperativeHandle } from 'react'
+import { Dimensions, StyleSheet } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   runOnJS,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Box, Text } from '@gluestack-ui/themed';
+} from 'react-native-reanimated'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import {
+  Box,
+  Text,
+  Image,
+  ScrollView,
+  LinearGradient,
+} from '@gluestack-ui/themed'
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
-const EXIT_DISTANCE = SCREEN_WIDTH * 1.5;
+const SCREEN_WIDTH = Dimensions.get('window').width
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25
+const EXIT_DISTANCE = SCREEN_WIDTH * 1.5
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window')
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.9
+
+export type TinderCardRef = {
+  swipeLeft: () => void
+  swipeRight: () => void
+}
+
+type CardItem = {
+  introduction: string
+  imageUrls: string[]
+  name: string
+}
 
 type TinderCardProps = {
-  text: string;
-  imageUrl: string;
-  onSwipeLeft?: () => void;
-  onSwipeRight?: () => void;
-};
+  card: CardItem
+  onSwipeLeft?: () => void
+  onSwipeRight?: () => void
+}
 
-const TinderCard = ({
-  text,
-  imageUrl,
-  onSwipeLeft,
-  onSwipeRight,
-}: TinderCardProps) => {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const rotate = useSharedValue(0); // 用來旋轉卡片
+const TinderCard = forwardRef<TinderCardRef, TinderCardProps>(
+  ({ card, onSwipeLeft, onSwipeRight }, ref) => {
+    const translateX = useSharedValue(0)
+    const translateY = useSharedValue(0)
+    const rotate = useSharedValue(0)
 
-  const panGesture = Gesture.Pan()
-    .onUpdate((e) => {
-      translateX.value = e.translationX;
-      translateY.value = e.translationY;
-      rotate.value = e.translationX / 20; // 根據滑動改變旋轉角度
-    })
-    .onEnd(() => {
-      const shouldSwipe = Math.abs(translateX.value) > SWIPE_THRESHOLD;
+    const swipe = (direction: 'left' | 'right') => {
+      const toX = direction === 'right' ? EXIT_DISTANCE : -EXIT_DISTANCE
+      translateX.value = withSpring(toX, { damping: 15 }, () => {
+        if (direction === 'right' && onSwipeRight) {
+          runOnJS(onSwipeRight)()
+        } else if (direction === 'left' && onSwipeLeft) {
+          runOnJS(onSwipeLeft)()
+        }
+      })
+    }
 
-      if (shouldSwipe) {
-        const toRight = translateX.value > 0;
-        const toX = toRight ? EXIT_DISTANCE : -EXIT_DISTANCE;
+    useImperativeHandle(ref, () => ({
+      swipeLeft: () => swipe('left'),
+      swipeRight: () => swipe('right'),
+    }))
 
-        translateX.value = withSpring(toX, { damping: 15 }, () => {
-          if (toRight && onSwipeRight) {
-            runOnJS(onSwipeRight)();
-          } else if (!toRight && onSwipeLeft) {
-            runOnJS(onSwipeLeft)();
-          }
-        });
-      } else {
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-        rotate.value = withSpring(0);
-      }
-    });
+    const panGesture = Gesture.Pan()
+      .onUpdate((e) => {
+        translateX.value = e.translationX
+        translateY.value = e.translationY
+        rotate.value = e.translationX / 20
+      })
+      .onEnd(() => {
+        const shouldSwipe = Math.abs(translateX.value) > SWIPE_THRESHOLD
 
-  // 滑動動畫的樣式
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { rotate: `${rotate.value}deg` },
-    ],
-  }));
+        if (shouldSwipe) {
+          const toRight = translateX.value > 0
+          swipe(toRight ? 'right' : 'left')
+        } else {
+          translateX.value = withSpring(0)
+          translateY.value = withSpring(0)
+          rotate.value = withSpring(0)
+        }
+      })
 
-  return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View style={[styles.card, animatedStyle]}>
-        <Box
-          bg="$backgroundLight0"
-          p="$5"
-          rounded="$2xl"
-          h={550}
-          shadowColor="black"
-          shadowOpacity={0.1}
-          shadowRadius={12}
-        >
-          <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <Text size="2xl" bold mb="$4">
-              {text}
-            </Text>
-            {[...Array(10)].map((_, i) => (
-              <Text key={i} mt="$2">
-                Lorem ipsum {i + 1}: 一些內容會讓你滑動來查看。
-              </Text>
-            ))}
-          </ScrollView>
-        </Box>
-      </Animated.View>
-    </GestureDetector>
-  );
-};
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { rotate: `${rotate.value}deg` },
+      ],
+    }))
+
+    const { introduction, imageUrls, name } = card
+
+    return (
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[styles.card, animatedStyle]}>
+          <Box bg="$backgroundLight0" p="$4" h={CARD_HEIGHT}>
+            <ScrollView borderRadius={20}>
+              <Box position="relative">
+                <Image
+                  alt={imageUrls[0]}
+                  source={{ uri: imageUrls[0] }}
+                  w="$full"
+                  h={CARD_HEIGHT - 64 - 48}
+                  borderRadius={20}
+                  resizeMode="cover"
+                />
+                <LinearGradient
+                  start='auto'
+                  end='auto'
+                />
+                <Text
+                  color="$white"
+                  size="2xl"
+                  position="absolute"
+                  bold
+                  m="$4"
+                  bottom="$10"
+                >
+                  {name}
+                </Text>
+              </Box>
+              <Text mt="$2">{introduction}</Text>
+            </ScrollView>
+          </Box>
+        </Animated.View>
+      </GestureDetector>
+    )
+  }
+)
 
 const styles = StyleSheet.create({
   card: {
     position: 'absolute',
     width: '100%',
-    paddingHorizontal: 20,
+    height: CARD_HEIGHT,
   },
-  image: {
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    height: 100,
     width: '100%',
-    height: 300,
-    borderRadius: 20,
-    marginBottom: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
-});
+})
 
-export default TinderCard;
+export default TinderCard

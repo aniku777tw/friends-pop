@@ -2,11 +2,11 @@ import 'react-native-reanimated'
 import '@/i18n'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
 import { THEME } from '@/constants/theme'
-import { GluestackUIProvider } from '@gluestack-ui/themed'
+import { Button,Text, GluestackUIProvider } from '@gluestack-ui/themed'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { gluestackConfig } from '@/theme/gluestack-ui.config'
+import  ScreenStack from '@/screen'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -15,7 +15,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: '/index',
 }
 
 export default function RootLayout() {
@@ -24,18 +24,12 @@ export default function RootLayout() {
     ...FontAwesome.font,
   })
 
-  if (!fontsLoaded) return null
-
+  
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GluestackUIProvider config={gluestackConfig} colorMode={THEME.LIGHT}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(modals)/modal"
-            options={{ presentation: 'modal' }}
-          />
-        </Stack>
+        <ScreenStack />
       </GluestackUIProvider>
     </GestureHandlerRootView>
   )
